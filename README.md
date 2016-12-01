@@ -1,2 +1,2 @@
 # ODDP2
-Algorytm SA dla prroblemu przepływowego
+Algorytm SA dla problemu przepływowego
