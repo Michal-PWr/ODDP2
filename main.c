@@ -4,22 +4,11 @@
  *  Created on: 20 paŸ 2016
  *      Author: Micha³
  */
-#include <stdio.h>			// T - nastêpnicy technologiczni
+#include <stdio.h>			
 
-#define MAX_ZADAN 100			// P - czasy wykonania operacji
+#define MAX_ZADAN 100			
 #define MAX_STANOWISK 20
 
-void ZamienKolejnosc(int *A, int *Pm, int a, int b)
-{
-	int c = Pm[a];
-	int d = A[b];
-	A[c] = b;
-	A[a] = d;
-	A[b] = a;
-	Pm[a] = b;
-	Pm[b] = c;
-	Pm[d] = a;
-}
 int WczytajZPliku(FILE *fp, int *iloscZadan, int *iloscStanowisk, int czasyZadan[MAX_ZADAN][MAX_STANOWISK])
 {
 	int i;
