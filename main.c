@@ -255,7 +255,7 @@ int PrzesunONZaBlok(int indeks, int *Sk, int *PiKBloku, int n, int *kolejnoscZad
 		ileDoKoncaBloku++;
 	}
 	for (indeks = 0; kolejnoscZadan[indeks] != nrZadania ; indeks++);
-	memcpy(&kolejnoscZadan[indeks], &kolejnoscZadan[indeks + 1], sizeof(int)*(ileDoKoncaBloku+n));
+	memmove(&kolejnoscZadan[indeks], &kolejnoscZadan[indeks + 1], sizeof(int)*(ileDoKoncaBloku+n));
 	kolejnoscZadan[indeks+ileDoKoncaBloku+n] = nrZadania;
 	return 0;
 }
@@ -268,7 +268,7 @@ int PrzesunONPrzedBlok(int indeks, int *Sk, int *PiKBloku, int n, int *kolejnosc
 		ileDoPoczatkuBloku++;
 	}
 	for (indeks = 0; kolejnoscZadan[indeks] != nrZadania ; indeks++);
-	memcpy(&kolejnoscZadan[indeks-ileDoPoczatkuBloku-n+1], &kolejnoscZadan[indeks-ileDoPoczatkuBloku-n], sizeof(int)*(ileDoPoczatkuBloku+n));
+	memmove(&kolejnoscZadan[indeks-ileDoPoczatkuBloku-n+1], &kolejnoscZadan[indeks-ileDoPoczatkuBloku-n], sizeof(int)*(ileDoPoczatkuBloku+n));
 	kolejnoscZadan[indeks-ileDoPoczatkuBloku-n] = nrZadania;
 	return 0;
 }
@@ -289,12 +289,12 @@ int PrzesunNaNNaDrugiejMaszynie (int nrZadania, int *kolejnoscZadan, int n, int 
 
 	if (indeksZadania < indeksZera) //jest na pierwszej maszynie
 	{
-		memcpy(&kolejnoscZadan[indeksZadania], &kolejnoscZadan[indeksZadania+1], sizeof(int) * (indeksZera - indeksZadania + n) );
+		memmove(&kolejnoscZadan[indeksZadania], &kolejnoscZadan[indeksZadania+1], sizeof(int) * (indeksZera - indeksZadania + n) );
 		kolejnoscZadan[indeksZera + n] = nrZadania;
 	}
 	else //jest na drugiej maszynie
 	{
-		memcpy(&kolejnoscZadan[poczatek + n + 1], &kolejnoscZadan[poczatek + n], sizeof(int) * (indeksZadania - poczatek - n));
+		memmove(&kolejnoscZadan[poczatek + n + 1], &kolejnoscZadan[poczatek + n], sizeof(int) * (indeksZadania - poczatek - n));
 		kolejnoscZadan[poczatek + n] = nrZadania;
 	}
 	return 0;
@@ -336,10 +336,10 @@ int main()
 
 	Cmax_min = Cmax;
 	Cmax_poprzedni = Cmax;
-	memcpy(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+	memmove(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
 	while (temperatura > 0.1)
 	{
-		memcpy(kolejnoscZadanKopia, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+		memmove(kolejnoscZadanKopia, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
 		int indeks = rand() % iloscWSciezce + 1; //element do zamiany
 
 		if (PiKBloku[indeks] == 0) //ani poczatek ani koniec bloku
@@ -399,7 +399,7 @@ int main()
 		if (Cmax < Cmax_min)
 		{
 			Cmax_min = Cmax;
-			memcpy(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+			memmove(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
 		}
 		if (delta <= 0) //nie gorzej - zamieniamy
 		{
@@ -411,7 +411,7 @@ int main()
 		{
 			if (exp(-delta/temperatura) < generatorLiczbLosowych()) //Nie zmieniamy
 			{
-				memcpy(kolejnoscZadan, kolejnoscZadanKopia, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+				memmove(kolejnoscZadan, kolejnoscZadanKopia, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
 				ObliczNastepnikowMaszynowych(A, iloscStanowisk, iloscZadan, kolejnoscZadan);
 				ObliczNastepnikowTechnologicznych(T, iloscStanowisk, iloscZadan, kolejnoscZadan);
 				Cmax_poprzedni = ObliczCmaxZPermutacji(A, T, czasyZadan, &indexCmax, Ph, Pm, Pt, iloscStanowisk * iloscZadan);
