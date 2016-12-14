@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MAX_ZADAN 100			// P - czasy wykonania operacji
 #define MAX_STANOWISK 20
@@ -23,10 +24,11 @@ int WczytajZPliku(FILE *fp, int *iloscZadan, int *iloscStanowisk, int *czasyZada
 	}
 	return 0;
 }
+
 void UstawPoczatkowaPermutacje(int *kolejnoscZadan, int iloscZadan, int iloscStanowisk)
 {
-	//Wszystkie zadania po kolei tylko na jednej maszynie ze stanowiska
-	int przesuniecie = 1;
+	int przesuniecie = 1; //Wszystkie zadania po kolei tylko na jednej maszynie ze stanowiska
+
 	for (int i =0, j = 0; j<iloscStanowisk; ++j)
 	{
 		for (i = 0; i< iloscZadan; ++i)
@@ -63,6 +65,7 @@ int ObliczNastepnikowTechnologicznych(int *T, int iloscStanowisk, int iloscZadan
 
 	return 0;
 }
+
 int ObliczLiczbePoprzenikow(int *LP, int *A, int *T, int n)
 {
 	memset(LP, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
@@ -74,6 +77,7 @@ int ObliczLiczbePoprzenikow(int *LP, int *A, int *T, int n)
 	}
 	return 0;
 }
+
 int WyznaczKolejke(int *Q, int *LP, int *A, int *T, int n)
 {
 	memset(Q, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
@@ -107,6 +111,7 @@ int WyznaczKolejke(int *Q, int *LP, int *A, int *T, int n)
 int ObliczCzasyZakonczeniaiPh(int *C, int *Ph, int *Q, int *Pm, int *Pt, int *T, int *A, int *P, int n)
 {
 	int i,j;
+
 	memset(Pm, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
 	memset(Pt, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
 	for (j = 1; j <= n; j++)	//Obliczenie czasu zakoñczenia procesów
@@ -126,6 +131,7 @@ int ObliczCzasyZakonczeniaiPh(int *C, int *Ph, int *Q, int *Pm, int *Pt, int *T,
 int ZnajdzCMax(int *C, int n)
 {
 	int max = 0, indexCmax = 0;
+
 	for (int i = 1; i <= n; i++) //Znajdowanie procesu o maksymalnym czasie zakoñczenia
 	{
 		if (C[i] > max)
@@ -137,13 +143,14 @@ int ZnajdzCMax(int *C, int n)
 	return indexCmax;
 }
 
-int ObliczCmaxZPermutacji(int *a, int *t, int *p, int *indexCmax, int *ph, int *pm, int *pt, int n)
+int ObliczCmaxZPermutacji(int *A, int *T, int *p, int *indexCmax, int *ph, int *pm, int *pt, int n)
 {
 	int temp = n;
 	int LP[MAX_ZADAN*MAX_STANOWISK+1] = { 0 }, C[MAX_ZADAN*MAX_STANOWISK+1] = {0}, Q[MAX_ZADAN*MAX_STANOWISK+1] = {0};
-	ObliczLiczbePoprzenikow(LP, a, t, temp);
-	WyznaczKolejke(Q, LP, a, t, temp);
-	ObliczCzasyZakonczeniaiPh(C, ph, Q, pm, pt, t, a, p, temp);
+
+	ObliczLiczbePoprzenikow(LP, A, T, temp);
+	WyznaczKolejke(Q, LP, A, T, temp);
+	ObliczCzasyZakonczeniaiPh(C, ph, Q, pm, pt, T, A, p, temp);
 
 	int index = ZnajdzCMax(C, temp);
 	*indexCmax = index;
@@ -153,6 +160,7 @@ int ObliczCmaxZPermutacji(int *a, int *t, int *p, int *indexCmax, int *ph, int *
 int ZnajdzSziezkeKrytyczna(int *Sk, int *Ph, int index_Cmax)
 {
 	int i, iloscWSciezce;
+
 	for (i = 1, iloscWSciezce = 0; index_Cmax != 0; i++, iloscWSciezce++) //Znajdowanie œcie¿ki krytycznej
 	{
 		Sk[i] = index_Cmax;
@@ -184,9 +192,11 @@ int ObliczPoczatkiIKonceBlokow(int *PiKBloku, int *Pt, int *Sk, int *Pm, int *A,
 int IloscMiejscaZaBlokiem(int indeks, int *PiKBloku, int *Sk, int *A, int iloscWSciezce)
 {
 	int i,ilosc =0;
+
 	for (i = indeks; PiKBloku[i] != 2 && i <= iloscWSciezce; i++)
 	{
-		;
+		if (PiKBloku[i] == 1)
+			return 0;
 	}
 	if (i > iloscWSciezce)
 		return 0; //nie ma miejsc za blokiem
@@ -201,9 +211,11 @@ int IloscMiejscaZaBlokiem(int indeks, int *PiKBloku, int *Sk, int *A, int iloscW
 int IloscMiejscaPrzedBlokiem(int indeks, int *PiKBloku, int *Sk, int *Pm, int iloscWSciezce)
 {
 	int i,ilosc =0;
+
 	for (i = indeks; PiKBloku[i] != 1 && i > 0; i--)
 	{
-		;
+		if (PiKBloku[i] == 2)
+			return 0;
 	}
 	if (i == 0)
 		return 0; //nie ma miejsc przed blokiem
@@ -275,17 +287,8 @@ int PrzesunNaNNaDrugiejMaszynie (int nrZadania, int *kolejnoscZadan, int n, int 
 			indeksZera = i;
 	}
 
-
 	if (indeksZadania < indeksZera) //jest na pierwszej maszynie
 	{
-		if (nrZadania == 16)
-		{
-		printf("FUNKCJA indeksZadania: %d indeksZera: %d\n", indeksZadania, indeksZera);
-		printf("Na poczatku funkcji:\n");
-		for (int j = 0; j < iloscStanowisk * iloscZadan + 2 * iloscStanowisk;
-				j++)
-			printf("%d ", kolejnoscZadan[j]);
-		}
 		memcpy(&kolejnoscZadan[indeksZadania], &kolejnoscZadan[indeksZadania+1], sizeof(int) * (indeksZera - indeksZadania + n) );
 		kolejnoscZadan[indeksZera + n] = nrZadania;
 	}
@@ -294,14 +297,12 @@ int PrzesunNaNNaDrugiejMaszynie (int nrZadania, int *kolejnoscZadan, int n, int 
 		memcpy(&kolejnoscZadan[poczatek + n + 1], &kolejnoscZadan[poczatek + n], sizeof(int) * (indeksZadania - poczatek - n));
 		kolejnoscZadan[poczatek + n] = nrZadania;
 	}
-	if (nrZadania == 16)
-	{
-	printf("Na koncu funkcji:\n");
-	for (int j = 0; j < iloscStanowisk * iloscZadan + 2 * iloscStanowisk;
-			j++)
-		printf("%d ", kolejnoscZadan[j]);
-	}
 	return 0;
+}
+double generatorLiczbLosowych()
+{
+	double temp = rand() ;
+	return temp / RAND_MAX;
 }
 int main()
 {
@@ -309,60 +310,38 @@ int main()
 	int A[MAX_ZADAN*MAX_STANOWISK+1] = {0}; // nastepnicy maszynowi
 	int T[MAX_ZADAN*MAX_STANOWISK+1] = {0}; // nastepnicy technologiczni
 	int czasyZadan[MAX_ZADAN*MAX_STANOWISK+1] = {0};
-	int kolejnoscZadan[MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK] = {0};
-	int kolejnoscZadanKopia[MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK] = {0};// jest to tablica zawieraj¹ca kolejnosc wykonywania zadan na maszynach. '-1' oddziela maszyny
+	int kolejnoscZadan[MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK+1] = {0};
+	int kolejnoscZadanKopia[MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK+1] = {0};
+	int kolejnoscZadanNajlepsza[MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK+1] = {0};
 	int Pt[MAX_ZADAN*MAX_STANOWISK+1] = { 0 }, Pm[MAX_ZADAN*MAX_STANOWISK+1] = { 0 }, Ph[MAX_ZADAN*MAX_STANOWISK+1] = { 0 };
 	int Sk[MAX_ZADAN*MAX_STANOWISK+1];
 	int PiKBloku[MAX_ZADAN*MAX_STANOWISK+1] = { 0 };
-	int iloscZadan, iloscStanowisk, Cmax, Cmax_min, indexCmax, iloscWSciezce;
+	int iloscZadan, iloscStanowisk, Cmax, Cmax_min, Cmax_poprzedni, indexCmax, iloscWSciezce;
 	int iloscPrzed, iloscZa, iloscNaDrugiejMaszynie;
+	double temperatura = 1000;
+	double lambda = 0.9995;
+	int delta;
+
+	srand(time(NULL)); //Ziarno generatora liczb losowych
+
 	fp = fopen("NEH2.DAT", "r");
 	WczytajZPliku(fp, &iloscZadan, &iloscStanowisk, czasyZadan);
-//	for (int i=0; i<=(iloscZadan*iloscStanowisk); i++)
-//	{
-//		printf("%d ", czasyZadan[i]);
-//	}
-	printf("\n");
+
 	UstawPoczatkowaPermutacje(kolejnoscZadan, iloscZadan, iloscStanowisk);
-//	for (int i=0; i<iloscStanowisk*iloscZadan+2*iloscStanowisk; i++)
-//		printf("%d ",kolejnoscZadan[i]);
 	ObliczNastepnikowMaszynowych(A, iloscStanowisk, iloscZadan, kolejnoscZadan);
-//	printf("\n");
-//	for (int i = 0; i<= iloscStanowisk*iloscZadan; i++ )
-//	{
-//		printf("%d ", A[i]);
-//	}
-//	printf("\n");
 	ObliczNastepnikowTechnologicznych(T, iloscStanowisk, iloscZadan, kolejnoscZadan);
-//	for (int i = 0; i<= iloscStanowisk*iloscZadan; i++ )
-//	{
-//		printf("%d ", T[i]);
-//	}
-//	printf("\n");
-
 	Cmax = ObliczCmaxZPermutacji(A, T, czasyZadan, &indexCmax, Ph, Pm, Pt, iloscStanowisk * iloscZadan);
-//	printf("%d\n", Cmax_min);
 	iloscWSciezce = ZnajdzSziezkeKrytyczna(Sk, Ph, indexCmax);
-//	printf("%d\n", iloscWSciezce);
 	ObliczPoczatkiIKonceBlokow(PiKBloku, Pt, Sk, Pm, A, T, iloscWSciezce);
-//	for (int i=0; i <= iloscWSciezce; i++)
-//		printf("%d ", Sk[i]);
-	Cmax_min = Cmax;
 
-	for (int i=0; i<100; i++)
+	Cmax_min = Cmax;
+	Cmax_poprzedni = Cmax;
+	memcpy(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+	while (temperatura > 0.1)
 	{
-		printf("Na poczatku kroku kolejka:\n");
-		for (int j = 0; j < iloscStanowisk * iloscZadan + 2 * iloscStanowisk; j++)
-					printf("%d ",kolejnoscZadan[j]);
-		printf("\nSciezka krytyczna\n");
-		for (int j = 0; j < iloscWSciezce; j++)
-					printf("%d ",Sk[j]);
-		printf("\nPoczatkiiKonce\n");
-		for (int j = 0; j < iloscWSciezce; j++)
-					printf("%d ",PiKBloku[j]);
 		memcpy(kolejnoscZadanKopia, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
 		int indeks = rand() % iloscWSciezce + 1; //element do zamiany
-		printf("\nIndeks: %d\n", indeks);
+
 		if (PiKBloku[indeks] == 0) //ani poczatek ani koniec bloku
 		{
 			iloscPrzed = IloscMiejscaPrzedBlokiem(indeks, PiKBloku, Sk, Pm, iloscWSciezce);
@@ -372,17 +351,14 @@ int main()
 			if (opcja < iloscPrzed)
 			{
 				PrzesunONPrzedBlok(indeks, Sk, PiKBloku, opcja, kolejnoscZadan);
-				printf("Przesuwam %d przed blok o %d\n", Sk[indeks], opcja);
 			}
 			else if (opcja < iloscZa + iloscPrzed)
 			{
 				PrzesunONZaBlok(indeks, Sk, PiKBloku, opcja - iloscPrzed, kolejnoscZadan);
-				printf("Przesuwam %d za blok o %d %d\n", Sk[indeks], opcja - iloscPrzed, iloscZa);
 			}
 			else
 			{
 				PrzesunNaNNaDrugiejMaszynie(Sk[indeks], kolejnoscZadan, opcja - iloscPrzed - iloscZa, iloscZadan, iloscStanowisk);
-				printf("Przesuwam %d na druga maszyne na %d\n", Sk[indeks], opcja - iloscPrzed - iloscZa);
 			}
 
 		}
@@ -394,12 +370,10 @@ int main()
 			if (opcja < iloscZa )
 			{
 				PrzesunONZaBlok(indeks, Sk, PiKBloku, opcja, kolejnoscZadan);
-				printf("Przesuwam %d za blok o %d\n", Sk[indeks], opcja );
 			}
 			else
 			{
 				PrzesunNaNNaDrugiejMaszynie(Sk[indeks], kolejnoscZadan, opcja - iloscZa, iloscZadan, iloscStanowisk);
-				printf("Przesuwam %d na druga maszyne na %d %d %d\n", Sk[indeks], opcja - iloscZa, iloscZa, iloscNaDrugiejMaszynie);
 			}
 		}
 		if (PiKBloku[indeks] == 2) //koniec bloku
@@ -410,48 +384,51 @@ int main()
 			if (opcja < iloscPrzed)
 			{
 				PrzesunONPrzedBlok(indeks, Sk, PiKBloku, opcja, kolejnoscZadan);
-				printf("Przesuwam %d przed blok o %d\n", Sk[indeks], opcja);
 			}
 			else
 			{
 				PrzesunNaNNaDrugiejMaszynie(Sk[indeks], kolejnoscZadan, opcja - iloscPrzed, iloscZadan, iloscStanowisk);
-				printf("Przesuwam %d na druga maszyne na %d\n", Sk[indeks], opcja - iloscPrzed);
 			}
 		}
 
-//		for (int j = 0; j < iloscStanowisk * iloscZadan + 2 * iloscStanowisk; j++)
-//			printf("%d ",kolejnoscZadan[j]);
-//		printf("\n");
 		//Mamy przesuniete teraz liczymy wszystko
 		ObliczNastepnikowMaszynowych(A, iloscStanowisk, iloscZadan, kolejnoscZadan);
 		ObliczNastepnikowTechnologicznych(T, iloscStanowisk, iloscZadan, kolejnoscZadan);
 		Cmax = ObliczCmaxZPermutacji(A, T, czasyZadan, &indexCmax, Ph, Pm, Pt, iloscStanowisk * iloscZadan);
-		if (Cmax < Cmax_min) //nie gorzej
+		delta = Cmax - Cmax_poprzedni;
+		if (Cmax < Cmax_min)
+		{
+			Cmax_min = Cmax;
+			memcpy(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+		}
+		if (delta <= 0) //nie gorzej - zamieniamy
 		{
 			iloscWSciezce = ZnajdzSziezkeKrytyczna(Sk, Ph, indexCmax);
 			ObliczPoczatkiIKonceBlokow(PiKBloku, Pt, Sk, Pm, A, T, iloscWSciezce);
-			Cmax_min = Cmax;
+			Cmax_poprzedni = Cmax;
 		}
-		else //gorzej
+		else //gorzej - moze zamieniamy
 		{
-			memcpy(kolejnoscZadan, kolejnoscZadanKopia, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
-			ObliczNastepnikowMaszynowych(A, iloscStanowisk, iloscZadan, kolejnoscZadan);
-			ObliczNastepnikowTechnologicznych(T, iloscStanowisk, iloscZadan, kolejnoscZadan);
-			Cmax = ObliczCmaxZPermutacji(A, T, czasyZadan, &indexCmax, Ph, Pm, Pt, iloscStanowisk * iloscZadan);
+			if (exp(-delta/temperatura) < generatorLiczbLosowych()) //Nie zmieniamy
+			{
+				memcpy(kolejnoscZadan, kolejnoscZadanKopia, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+				ObliczNastepnikowMaszynowych(A, iloscStanowisk, iloscZadan, kolejnoscZadan);
+				ObliczNastepnikowTechnologicznych(T, iloscStanowisk, iloscZadan, kolejnoscZadan);
+				Cmax_poprzedni = ObliczCmaxZPermutacji(A, T, czasyZadan, &indexCmax, Ph, Pm, Pt, iloscStanowisk * iloscZadan);
+			}
+			else	//gorzej ale zamieniamy
+			{
+				iloscWSciezce = ZnajdzSziezkeKrytyczna(Sk, Ph, indexCmax);
+				ObliczPoczatkiIKonceBlokow(PiKBloku, Pt, Sk, Pm, A, T, iloscWSciezce);
+				Cmax_poprzedni = Cmax;
+			}
 		}
-		printf("Cmax_min: %d\n\n", Cmax_min);
+		printf("Cmax_min: %d temperatura: %f\n", Cmax_min, temperatura);
+		temperatura *= lambda;
 	}
-//	printf("\n%d", IloscMiejscaZaBlokiem(1, PiKBloku, Sk, A, iloscWSciezce));
-//	printf("\n%d", IloscMiejscaNaDrugiejMaszynie(1, kolejnoscZadan, iloscZadan, iloscStanowisk));
-//	//PrzesunONZaBlok(1, Sk, PiKBloku,3,kolejnoscZadan);
-//	PrzesunNaNNaDrugiejMaszynie(1, kolejnoscZadan, 0, iloscZadan, iloscStanowisk);
-//	PrzesunNaNNaDrugiejMaszynie(16, kolejnoscZadan, 1, iloscZadan, iloscStanowisk);
-//	printf("\n");
+	printf("Cmax_min: %d \n", Cmax_min);
 	for (int i = 0; i < iloscStanowisk * iloscZadan + 2 * iloscStanowisk; i++)
-		printf("%d ",kolejnoscZadan[i]);
-//	PrzesunNaNNaDrugiejMaszynie(1, kolejnoscZadan, 2, iloscZadan, iloscStanowisk);
-//	printf("\n");
-//	for (int i=0; i<iloscStanowisk*iloscZadan+2*iloscStanowisk; i++)
-//		printf("%d ",kolejnoscZadan[i]);
+		printf("%d ",kolejnoscZadanNajlepsza[i]);
+
 	return 0;
 }
