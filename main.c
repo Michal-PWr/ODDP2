@@ -44,7 +44,7 @@ void UstawPoczatkowaPermutacje(int *kolejnoscZadan, int iloscZadan, int iloscSta
 
 int ObliczNastepnikowMaszynowych(int *A, int iloscStanowisk, int iloscZadan, int *kolejnoscZadan)
 {
-	memset(A, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
+	memset(A, 0, (MAX_ZADAN * MAX_STANOWISK + 1) * sizeof(int) );
 	for (int i = 1; i <= iloscZadan * iloscStanowisk + 2 * iloscStanowisk; i++)
 	{
 		A[kolejnoscZadan[i]] = kolejnoscZadan[i+1];
@@ -54,7 +54,7 @@ int ObliczNastepnikowMaszynowych(int *A, int iloscStanowisk, int iloscZadan, int
 
 int ObliczNastepnikowTechnologicznych(int *T, int iloscStanowisk, int iloscZadan, int *kolejnoscZadan)
 {
-	memset(T, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
+	memset(T, 0, (MAX_ZADAN * MAX_STANOWISK + 1) * sizeof(int) );
 	for (int i = 1; i <= iloscZadan * iloscStanowisk + 2 * iloscStanowisk; i++)
 	{
 		if ((i % iloscStanowisk) == 0)
@@ -68,7 +68,7 @@ int ObliczNastepnikowTechnologicznych(int *T, int iloscStanowisk, int iloscZadan
 
 int ObliczLiczbePoprzenikow(int *LP, int *A, int *T, int n)
 {
-	memset(LP, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
+	memset(LP, 0, (MAX_ZADAN * MAX_STANOWISK + 1) * sizeof(int) );
 	int i;
 	for (i = 1; i <= n; i++)
 	{
@@ -80,7 +80,7 @@ int ObliczLiczbePoprzenikow(int *LP, int *A, int *T, int n)
 
 int WyznaczKolejke(int *Q, int *LP, int *A, int *T, int n)
 {
-	memset(Q, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
+	memset(Q, 0, (MAX_ZADAN * MAX_STANOWISK + 1) * sizeof(int) );
 	int b = 0, e = 0, i, ns, o;
 	for (i = 1; i <= n; i++)
 	{
@@ -112,8 +112,8 @@ int ObliczCzasyZakonczeniaiPh(int *C, int *Ph, int *Q, int *Pm, int *Pt, int *T,
 {
 	int i,j;
 
-	memset(Pm, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
-	memset(Pt, 0, MAX_ZADAN*MAX_STANOWISK+1 * sizeof(int) );
+	memset(Pm, 0, (MAX_ZADAN * MAX_STANOWISK + 1) * sizeof(int) );
+	memset(Pt, 0, (MAX_ZADAN * MAX_STANOWISK + 1) * sizeof(int) );
 	for (j = 1; j <= n; j++)	//Obliczenie czasu zakoñczenia procesów
 	{
 		i = Q[j];
@@ -208,7 +208,7 @@ int IloscMiejscaZaBlokiem(int indeks, int *PiKBloku, int *Sk, int *A, int iloscW
 	return ilosc+1;
 }
 
-int IloscMiejscaPrzedBlokiem(int indeks, int *PiKBloku, int *Sk, int *Pm, int iloscWSciezce)
+int IloscMiejscaPrzedBlokiem(int indeks, int *PiKBloku, int *Sk, int *Pm, int iloscWSciezce, int *kolejnoscZadan)
 {
 	int i,ilosc =0;
 
@@ -219,10 +219,15 @@ int IloscMiejscaPrzedBlokiem(int indeks, int *PiKBloku, int *Sk, int *Pm, int il
 	}
 	if (i == 0)
 		return 0; //nie ma miejsc przed blokiem
-	i = Sk[i];
-	for ( ; Pm[i] != 0; ilosc++ )
+	for ( i = Sk[i]; Pm[i] != 0; ilosc++ )
 	{
 		i = Pm[i];
+		if (ilosc > 1000)
+		{
+//			for (int i = 0; i < 10 * 100 + 2 * 10; i++)
+//				printf("%d ",kolejnoscZadan[i]);
+		}
+			;
 	}
 	return ilosc+1;
 }
@@ -319,12 +324,12 @@ int main()
 	int iloscZadan, iloscStanowisk, Cmax, Cmax_min, Cmax_poprzedni, indexCmax, iloscWSciezce;
 	int iloscPrzed, iloscZa, iloscNaDrugiejMaszynie;
 	double temperatura = 1000;
-	double lambda = 0.9995;
+	double lambda = 0.99999;
 	int delta;
 
 	srand(time(NULL)); //Ziarno generatora liczb losowych
 
-	fp = fopen("NEH2.DAT", "r");
+	fp = fopen("NEH9.DAT", "r");
 	WczytajZPliku(fp, &iloscZadan, &iloscStanowisk, czasyZadan);
 
 	UstawPoczatkowaPermutacje(kolejnoscZadan, iloscZadan, iloscStanowisk);
@@ -333,18 +338,18 @@ int main()
 	Cmax = ObliczCmaxZPermutacji(A, T, czasyZadan, &indexCmax, Ph, Pm, Pt, iloscStanowisk * iloscZadan);
 	iloscWSciezce = ZnajdzSziezkeKrytyczna(Sk, Ph, indexCmax);
 	ObliczPoczatkiIKonceBlokow(PiKBloku, Pt, Sk, Pm, A, T, iloscWSciezce);
-
+	printf("%d\n", Cmax);
 	Cmax_min = Cmax;
 	Cmax_poprzedni = Cmax;
-	memmove(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+	memmove(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * (MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK));
 	while (temperatura > 0.1)
 	{
-		memmove(kolejnoscZadanKopia, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+		memmove(kolejnoscZadanKopia, kolejnoscZadan, sizeof(int) * (MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK));
 		int indeks = rand() % iloscWSciezce + 1; //element do zamiany
 
 		if (PiKBloku[indeks] == 0) //ani poczatek ani koniec bloku
 		{
-			iloscPrzed = IloscMiejscaPrzedBlokiem(indeks, PiKBloku, Sk, Pm, iloscWSciezce);
+			iloscPrzed = IloscMiejscaPrzedBlokiem(indeks, PiKBloku, Sk, Pm, iloscWSciezce, kolejnoscZadan);
 			iloscZa = IloscMiejscaZaBlokiem(indeks, PiKBloku, Sk, A, iloscWSciezce);
 			iloscNaDrugiejMaszynie = IloscMiejscaNaDrugiejMaszynie(Sk[indeks], kolejnoscZadan, iloscZadan, iloscStanowisk);
 			int opcja = rand() % (iloscPrzed + iloscZa + iloscNaDrugiejMaszynie);
@@ -378,7 +383,7 @@ int main()
 		}
 		if (PiKBloku[indeks] == 2) //koniec bloku
 		{
-			iloscPrzed = IloscMiejscaPrzedBlokiem(indeks, PiKBloku, Sk, Pm, iloscWSciezce);
+			iloscPrzed = IloscMiejscaPrzedBlokiem(indeks, PiKBloku, Sk, Pm, iloscWSciezce, kolejnoscZadan);
 			iloscNaDrugiejMaszynie = IloscMiejscaNaDrugiejMaszynie(Sk[indeks], kolejnoscZadan, iloscZadan, iloscStanowisk);
 			int opcja = rand() % (iloscPrzed + iloscNaDrugiejMaszynie);
 			if (opcja < iloscPrzed)
@@ -391,6 +396,7 @@ int main()
 			}
 		}
 
+
 		//Mamy przesuniete teraz liczymy wszystko
 		ObliczNastepnikowMaszynowych(A, iloscStanowisk, iloscZadan, kolejnoscZadan);
 		ObliczNastepnikowTechnologicznych(T, iloscStanowisk, iloscZadan, kolejnoscZadan);
@@ -399,7 +405,7 @@ int main()
 		if (Cmax < Cmax_min)
 		{
 			Cmax_min = Cmax;
-			memmove(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+			memmove(kolejnoscZadanNajlepsza, kolejnoscZadan, sizeof(int) * (MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK));
 		}
 		if (delta <= 0) //nie gorzej - zamieniamy
 		{
@@ -411,7 +417,7 @@ int main()
 		{
 			if (exp(-delta/temperatura) < generatorLiczbLosowych()) //Nie zmieniamy
 			{
-				memmove(kolejnoscZadan, kolejnoscZadanKopia, sizeof(int) * MAX_ZADAN*MAX_STANOWISK+2*MAX_STANOWISK);
+				memcpy(kolejnoscZadan, kolejnoscZadanKopia, sizeof(int) * (iloscZadan*iloscStanowisk+2*iloscStanowisk));
 				ObliczNastepnikowMaszynowych(A, iloscStanowisk, iloscZadan, kolejnoscZadan);
 				ObliczNastepnikowTechnologicznych(T, iloscStanowisk, iloscZadan, kolejnoscZadan);
 				Cmax_poprzedni = ObliczCmaxZPermutacji(A, T, czasyZadan, &indexCmax, Ph, Pm, Pt, iloscStanowisk * iloscZadan);
